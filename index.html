@@ -2,17 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>StoneForge — Join the Waitlist</title>
   <meta name="description" content="A hedge fund that lives in your pocket. Join the StoneForge private beta waitlist." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=5" />
-  <link rel="stylesheet" href="premium.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="premium.css?v=7" />
+  <script>
+    if (matchMedia("(pointer: coarse)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      document.documentElement.classList.add("is-touch");
+    }
+  </script>
 </head>
 <body class="is-locked">
   <main class="site">
+    <div class="site__stage" aria-hidden="true">
     <video
       id="bg-video"
       class="site__video"
@@ -22,13 +28,13 @@
       playsinline
       webkit-playsinline
       preload="auto"
-      aria-hidden="true"
       tabindex="-1"
       disablepictureinpicture
       controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
     >
       <source src="assets/bridge.mp4" type="video/mp4" />
     </video>
+    </div>
     <div class="site__veil" aria-hidden="true"></div>
 
     <div class="site__content">
@@ -125,6 +131,8 @@
       var LOCAL = "assets/bridge.mp4";
       var starting = false;
 
+      var touch = document.documentElement.classList.contains("is-touch");
+
       function arm() {
         v.controls = false;
         v.removeAttribute("controls");
@@ -134,9 +142,9 @@
         v.loop = true;
         v.autoplay = true;
         v.playsInline = true;
-        v.setAttribute("muted", "muted");
-        v.setAttribute("autoplay", "autoplay");
-        v.setAttribute("loop", "loop");
+        v.setAttribute("muted", "");
+        v.setAttribute("autoplay", "");
+        v.setAttribute("loop", "");
         v.setAttribute("playsinline", "");
         v.setAttribute("webkit-playsinline", "");
       }
@@ -182,7 +190,14 @@
       }
 
       arm();
-      bootFromBlob();
+      // iOS is more reliable with a plain file URL than a blob.
+      if (touch) {
+        v.src = LOCAL;
+        v.load();
+        forcePlay();
+      } else {
+        bootFromBlob();
+      }
 
       ["loadedmetadata", "loadeddata", "canplay", "canplaythrough", "playing"].forEach(function (evt) {
         v.addEventListener(evt, function () {

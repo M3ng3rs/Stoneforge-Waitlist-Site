@@ -63,23 +63,46 @@ a { color: inherit; }
   isolation: isolate;
 }
 
-.site__video {
+.site__stage {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   width: 100%;
   height: 78%;
-  object-fit: cover;
-  object-position: 50% 42%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
   mix-blend-mode: multiply;
   filter: sepia(0.55) saturate(1.25) hue-rotate(-18deg) contrast(1.08) brightness(0.96);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.site__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;
   z-index: 0;
   pointer-events: none !important;
   user-select: none;
   background: transparent;
-  opacity: 1; /* always visible — never show browser play overlay waiting state */
+  opacity: 1;
   -webkit-appearance: none;
+}
+
+/* Keep the tint on the wrapper. A filter on the <video> itself blanks iPhone. */
+html.is-touch .site__stage {
+  height: min(52dvh, 480px);
+  mix-blend-mode: multiply;
+  filter: sepia(0.5) saturate(1.3) hue-rotate(-16deg) contrast(1.12) brightness(0.9);
+}
+
+html.is-touch .site__video {
+  opacity: 1;
 }
 
 .site__video.is-ready { opacity: 1; }
@@ -909,37 +932,109 @@ a { color: inherit; }
 
 .page-foot a:hover { color: var(--accent); }
 
-@media (max-width: 600px) {
-  .site__content { padding: 14px 16px 0; }
-  .site__video { height: 58%; }
+@media (max-width: 720px) {
+  body.is-locked {
+    height: auto;
+    min-height: 100svh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .site {
+    height: auto;
+    min-height: 100svh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .site__stage {
+    position: fixed;
+    height: min(48dvh, 460px);
+  }
+
+  .site__veil {
+    position: fixed;
+  }
+
+  .site__content {
+    min-height: 100svh;
+    min-height: 100dvh;
+    width: 100%;
+    padding:
+      calc(12px + env(safe-area-inset-top))
+      16px
+      calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .brand-logo { width: min(220px, 68vw); }
+
+  .wl-kicker { margin-top: 12px; }
 
   .wl-title {
-    font-size: clamp(28px, 8vw, 36px);
-    max-width: 13ch;
+    font-size: clamp(26px, 8vw, 34px);
+    max-width: 14ch;
   }
 
-  .waitlist__row { flex-direction: column; }
+  .wl-lead { font-size: 14.5px; }
 
-  .wl-form .waitlist__row {
-    flex-direction: column;
+  .wl-form { margin-top: 16px; }
+
+  .home-nav {
+    margin-bottom: 14px;
+    max-width: 100%;
   }
+
+  .waitlist__row,
+  .wl-form .waitlist__row { flex-direction: column; }
 
   .waitlist__input,
   .waitlist__btn,
-  .wl-form .waitlist__btn {
+  .wl-form .waitlist__btn,
+  .waitlist__link,
+  .waitlist__copy {
     width: 100%;
     flex: none;
   }
 
+  .field input,
+  .field textarea,
+  .field select,
+  .waitlist__input,
+  .compose__fields input,
+  .compose__fields textarea {
+    font-size: 16px;
+  }
+
   .topbar__inner {
-    width: calc(100% - 28px);
-    flex-direction: column;
-    align-items: flex-start;
+    width: calc(100% - 20px);
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+  }
+
+  .topbar__logo { height: 16px; }
+
+  .nav ul { justify-content: flex-end; }
+
+  .nav a {
+    font-size: 12px;
+    padding: 7px 8px;
   }
 
   .page,
-  .page-foot {
-    width: calc(100% - 28px);
+  .page--wide,
+  .page-foot,
+  .page-foot--wide {
+    width: calc(100% - 24px);
+  }
+
+  .page-foot,
+  .page-foot--wide {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
   }
 }
 

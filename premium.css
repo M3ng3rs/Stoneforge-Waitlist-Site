@@ -716,3 +716,118 @@ body.claim-open {
 .compose .status-line:empty {
   display: none;
 }
+
+@media (max-width: 720px) {
+  .topbar__inner {
+    width: calc(100% - 20px) !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding-top: calc(8px + env(safe-area-inset-top)) !important;
+    padding-bottom: 8px !important;
+  }
+
+  .nav a {
+    font-size: 12px !important;
+    padding: 7px 8px !important;
+  }
+
+  .feed-shell {
+    width: calc(100% - 16px);
+    padding-top: 12px;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+
+  .feed-header h1,
+  .auth-card h1,
+  .claim-card h2 {
+    font-size: 26px;
+  }
+
+  .compose,
+  .tweet,
+  .auth-card,
+  .card-block,
+  .rank-card {
+    padding: 16px 14px !important;
+  }
+
+  .compose__top,
+  .tweet__row {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .compose__fields input,
+  .compose__fields textarea,
+  .field input,
+  .field textarea,
+  .waitlist__input {
+    font-size: 16px !important;
+  }
+
+  .compose__bar {
+    flex-wrap: wrap;
+  }
+
+  .compose__bar .btn,
+  .auth-card .btn,
+  .claim-card .btn {
+    width: 100%;
+  }
+
+  .tweet__actions {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .tweet__score {
+    margin-left: 0;
+  }
+
+  .thread {
+    margin-left: 0;
+    padding-left: 10px;
+  }
+
+  .claim-overlay {
+    padding: 12px;
+    align-items: end;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .claim-card {
+    max-height: min(92dvh, 100%);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px 14px;
+    border-radius: 18px;
+  }
+
+  .session-bar {
+    width: calc(100% - 20px) !important;
+  }
+
+  .spot-grid,
+  .spot-grid:has(.position-card.is-visible) {
+    width: 100%;
+    padding: 16px 12px calc(40px + env(safe-area-inset-bottom));
+  }
+
+  .auth-card__mark {
+    width: 130px;
+  }
+
+  .rank-card__num {
+    font-size: 52px;
+  }
+
+  .waitlist__share {
+    width: 100%;
+  }
+}
