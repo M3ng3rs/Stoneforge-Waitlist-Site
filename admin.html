@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — StoneForge</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="premium.css?v=5" />
+</head>
+<body class="shell">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="index.html">
+        <img class="topbar__logo" src="assets/stoneforge-logo.png" alt="stoneforge." />
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="spot.html">Your Spot</a></li>
+          <li><a href="forum.html">Forum</a></li>
+          <li><a href="admin.html" aria-current="page">Admin</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="feed-shell fade-up">
+    <header class="feed-header">
+      <h1>Admin</h1>
+      <p>Sign in to reply on the forum as StoneForge. Replies show with an Admin badge.</p>
+    </header>
+
+    <section id="admin-gate" class="auth-card" style="margin:0 auto 20px">
+      <img class="auth-card__mark" src="assets/stoneforge-logo.png" alt="" />
+      <h1>Staff login</h1>
+      <p class="auth-card__lead">Credentials live in <code style="font-family:var(--mono);font-size:12px">config.js</code>.</p>
+      <form class="form-grid" id="admin-login-form" style="margin-top:22px">
+        <label class="field">Email
+          <input type="email" name="email" required autocomplete="username" placeholder="admin@stoneforge.com" />
+        </label>
+        <label class="field">Password
+          <input type="password" name="password" required autocomplete="current-password" />
+        </label>
+        <div class="btn-row">
+          <button class="btn" type="submit" style="width:100%">Sign in as admin</button>
+        </div>
+        <p class="status-line" id="admin-status"></p>
+      </form>
+    </section>
+
+    <section id="admin-app" hidden>
+      <div class="session-bar is-visible admin-live-banner" style="margin-bottom:14px">
+        <span>Signed in as <strong>Admin</strong> — replies will be highlighted</span>
+        <button type="button" class="btn btn--ghost" id="admin-sign-out">Sign out</button>
+      </div>
+
+      <div class="card-block" style="margin-bottom:14px;padding:18px !important">
+        <h2 style="margin:0;font-size:18px;font-family:var(--display)">Moderation</h2>
+        <p class="page__lead" style="margin-top:6px">Use <strong>Post reply</strong> under any thread. <a href="forum.html" style="color:var(--accent-deep);font-weight:600">Open public forum →</a></p>
+      </div>
+
+      <div class="feed-list posts" id="posts" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="page-foot page-foot--wide">
+    <span>© <span data-year>2026</span> StoneForge Trading</span>
+    <span class="mono" style="text-transform:none;letter-spacing:0">Not linked in public nav — bookmark this URL.</span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=6"></script>
+  <script src="cloud.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

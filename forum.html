@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum — StoneForge</title>
+  <meta name="description" content="Tips, questions, votes, and admin replies from the StoneForge community." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="premium.css?v=5" />
+</head>
+<body class="shell">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="index.html">
+        <img class="topbar__logo" src="assets/stoneforge-logo.png" alt="stoneforge." />
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="spot.html">Your Spot</a></li>
+          <li><a href="forum.html" aria-current="page">Forum</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="feed-shell fade-up">
+    <header class="feed-header">
+      <h1>Forum</h1>
+      <p>Tips, questions, and official replies — sorted by community votes.</p>
+      <p class="mono" id="backend-mode" style="margin-top:10px;text-transform:none;letter-spacing:0;font-size:11px"></p>
+    </header>
+
+    <div id="forum-admin-banner" class="admin-live-banner card-block" hidden>
+      You’re signed in as <strong>Admin</strong> — reply boxes are unlocked under each post.
+    </div>
+
+    <section class="compose" aria-label="Compose post">
+      <form id="post-form">
+        <div class="compose__top">
+          <div class="avatar" aria-hidden="true">+</div>
+          <div class="compose__fields">
+            <input type="text" name="title" required maxlength="80" placeholder="What’s happening?" />
+            <textarea name="body" required maxlength="800" placeholder="Share a tip or ask the room…"></textarea>
+            <select name="type" required aria-label="Post type">
+              <option value="tip">Tip</option>
+              <option value="question">Question</option>
+            </select>
+          </div>
+        </div>
+        <div class="compose__bar">
+          <p class="compose__hint">Need an account? <a href="spot.html">Your Spot</a> · join from <a href="index.html">Home</a></p>
+          <button class="btn" type="submit">Post</button>
+        </div>
+        <p class="status-line" id="post-status"></p>
+      </form>
+    </section>
+
+    <div class="feed-list posts" id="posts" aria-live="polite"></div>
+  </main>
+
+  <footer class="page-foot page-foot--wide">
+    <span>© <span data-year>2026</span> StoneForge Trading</span>
+    <a href="index.html">Join from home →</a>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=6"></script>
+  <script src="cloud.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

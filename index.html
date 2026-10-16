@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StoneForge — Join the Waitlist</title>
+  <meta name="description" content="A hedge fund that lives in your pocket. Join the StoneForge private beta waitlist." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="premium.css?v=5" />
+</head>
+<body class="is-locked">
+  <main class="site">
+    <video
+      id="bg-video"
+      class="site__video"
+      muted
+      autoplay
+      loop
+      playsinline
+      webkit-playsinline
+      preload="auto"
+      aria-hidden="true"
+      tabindex="-1"
+      disablepictureinpicture
+      controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
+    >
+      <source src="assets/bridge.mp4" type="video/mp4" />
+    </video>
+    <div class="site__veil" aria-hidden="true"></div>
+
+    <div class="site__content">
+      <nav class="home-nav" aria-label="Primary">
+        <a href="index.html" class="is-active">Home</a>
+        <a href="spot.html">Your Spot</a>
+        <a href="forum.html">Forum</a>
+      </nav>
+
+      <div class="wl-hero">
+        <a class="brand-logo-link" href="index.html" aria-label="StoneForge home">
+          <img
+            class="brand-logo"
+            src="assets/stoneforge-logo.png"
+            alt="stoneforge."
+            width="994"
+            height="205"
+            decoding="async"
+          />
+        </a>
+
+        <p class="mono wl-kicker">Private beta · Waitlist open</p>
+        <h1 class="wl-title">A hedge fund that lives in your pocket</h1>
+        <p class="wl-lead">Orion finds the setup and shows its reasoning. Your broker holds the money — we never touch it.</p>
+
+        <form class="wl-form" data-waitlist autocomplete="on" id="home-waitlist">
+          <div class="waitlist__row">
+            <input
+              class="waitlist__input"
+              type="email"
+              name="email"
+              placeholder="Josh.hailemelekot@gmail.com"
+              required
+              aria-label="Email for waitlist"
+            />
+            <button class="waitlist__btn" type="submit">Join</button>
+          </div>
+          <p class="waitlist__hint">One email. Then lock in your login to post &amp; vote.</p>
+          <p class="waitlist__msg" data-waitlist-msg></p>
+          <div class="waitlist__share" data-waitlist-share hidden aria-hidden="true">
+            <input class="waitlist__link" type="text" readonly data-referral-link aria-label="Your referral link" />
+            <button type="button" class="waitlist__copy" data-copy-referral>Copy link</button>
+          </div>
+        </form>
+
+        <p class="wl-proof">
+          <span>Trade-only keys</span>
+          <span>Paper by default</span>
+          <span>Broker custody</span>
+        </p>
+      </div>
+
+      <p class="copy">© <span data-year>2026</span> StoneForge Trading</p>
+    </div>
+  </main>
+
+  <!-- Post-join: finish login -->
+  <div class="claim-overlay" id="claim-sheet" hidden>
+    <div class="claim-card" role="dialog" aria-modal="true" aria-labelledby="claim-title">
+      <p class="mono claim-card__kicker">You’re in · #<span id="claim-position">—</span></p>
+      <h2 id="claim-title">Finish your login</h2>
+      <p class="claim-card__lead">Set a display name and password so you can hit the forum and keep your spot.</p>
+
+      <form class="form-grid" id="claim-form" style="margin-top:18px">
+        <label class="field">Email
+          <input type="email" name="email" id="claim-email" required readonly autocomplete="email" />
+        </label>
+        <label class="field">Display name
+          <input type="text" name="name" id="claim-name" required maxlength="40" autocomplete="nickname" placeholder="JoshTheBoss" />
+        </label>
+        <label class="field">Password
+          <input type="password" name="password" id="claim-password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters" />
+        </label>
+        <div class="btn-row">
+          <button class="btn" type="submit" style="width:100%">Create login</button>
+        </div>
+        <p class="status-line" id="claim-status"></p>
+      </form>
+
+      <div class="waitlist__share is-visible claim-card__share">
+        <input class="waitlist__link" type="text" readonly id="claim-referral" aria-label="Your referral link" />
+        <button type="button" class="waitlist__copy" id="claim-copy">Copy link</button>
+      </div>
+
+      <button type="button" class="claim-skip" id="claim-skip">Skip for now</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var v = document.getElementById("bg-video");
+      if (!v) return;
+
+      var LOCAL = "assets/bridge.mp4";
+      var starting = false;
+
+      function arm() {
+        v.controls = false;
+        v.removeAttribute("controls");
+        v.muted = true;
+        v.defaultMuted = true;
+        v.volume = 0;
+        v.loop = true;
+        v.autoplay = true;
+        v.playsInline = true;
+        v.setAttribute("muted", "muted");
+        v.setAttribute("autoplay", "autoplay");
+        v.setAttribute("loop", "loop");
+        v.setAttribute("playsinline", "");
+        v.setAttribute("webkit-playsinline", "");
+      }
+
+      function ready() {
+        v.classList.add("is-ready");
+      }
+
+      function forcePlay() {
+        arm();
+        if (starting) return;
+        starting = true;
+        var p = v.play();
+        if (p && typeof p.then === "function") {
+          p.then(function () {
+            starting = false;
+            ready();
+          }).catch(function () {
+            starting = false;
+          });
+        } else {
+          starting = false;
+        }
+      }
+
+      function bootFromBlob() {
+        fetch(LOCAL, { cache: "force-cache" })
+          .then(function (r) { return r.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            v.src = url;
+            arm();
+            v.load();
+            forcePlay();
+          })
+          .catch(function () {
+            if (!v.getAttribute("src") && !(v.currentSrc || "").includes("bridge.mp4")) {
+              v.src = LOCAL;
+              v.load();
+            }
+            forcePlay();
+          });
+      }
+
+      arm();
+      bootFromBlob();
+
+      ["loadedmetadata", "loadeddata", "canplay", "canplaythrough", "playing"].forEach(function (evt) {
+        v.addEventListener(evt, function () {
+          if (evt === "playing") ready();
+          forcePlay();
+        });
+      });
+
+      v.addEventListener("pause", function () {
+        setTimeout(forcePlay, 0);
+      });
+
+      v.addEventListener("ended", function () {
+        v.currentTime = 0;
+        forcePlay();
+      });
+
+      setInterval(function () {
+        if (v.paused || v.ended) forcePlay();
+      }, 800);
+
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) forcePlay();
+      });
+
+      window.addEventListener("pageshow", forcePlay);
+      window.addEventListener("focus", forcePlay);
+
+      ["pointerdown", "touchstart", "keydown", "scroll", "wheel"].forEach(function (evt) {
+        window.addEventListener(evt, forcePlay, { passive: true });
+      });
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=6"></script>
+  <script src="cloud.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Spot — StoneForge</title>
+  <meta name="description" content="Check your StoneForge waitlist position and manage your account." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="premium.css?v=5" />
+</head>
+<body class="shell">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="index.html">
+        <img class="topbar__logo" src="assets/stoneforge-logo.png" alt="stoneforge." />
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="spot.html" aria-current="page">Your Spot</a></li>
+          <li><a href="forum.html">Forum</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="session-bar" id="session-bar">
+    <span>Signed in as <strong id="session-name"></strong></span>
+    <button type="button" class="btn btn--ghost" id="sign-out-btn">Sign out</button>
+  </div>
+
+  <div class="spot-grid fade-up">
+    <section class="rank-card position-card" id="position-card">
+      <p class="mono" style="margin:0">Waitlist position</p>
+      <p class="rank-card__num" id="position-num">—</p>
+      <p style="margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.45">Share your link. Move up one spot per accepted invite.</p>
+      <div class="waitlist__share is-visible" style="margin-top:18px;justify-content:flex-start">
+        <input class="waitlist__link" type="text" readonly id="position-referral" aria-label="Your referral link" />
+        <button type="button" class="waitlist__copy" id="position-copy">Copy link</button>
+      </div>
+    </section>
+
+    <p class="empty feed-empty" id="position-empty" style="grid-column:1/-1;margin:0">
+      Sign in below, or <a href="index.html" style="color:var(--accent-deep);font-weight:600">join from Home</a> first.
+    </p>
+
+    <section class="auth-card">
+      <img class="auth-card__mark" src="assets/stoneforge-logo.png" alt="" />
+      <h1>Your spot</h1>
+      <p class="auth-card__lead">Lock your position across devices. Post and vote on the forum.</p>
+
+      <div class="auth-toggle" role="tablist" aria-label="Sign in or create">
+        <button type="button" class="is-active" data-auth="signup">Create account</button>
+        <button type="button" data-auth="signin">Sign in</button>
+      </div>
+
+      <form class="form-grid" id="signup-form" style="margin-top:0">
+        <label class="field">Display name
+          <input type="text" name="name" required maxlength="40" autocomplete="nickname" placeholder="JoshTheBoss" />
+        </label>
+        <label class="field">Email
+          <input type="email" name="email" required autocomplete="email" placeholder="Josh.hailemelekot@gmail.com" />
+        </label>
+        <label class="field">Password
+          <input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters" />
+        </label>
+        <div class="btn-row">
+          <button class="btn" type="submit" style="width:100%">Create account</button>
+        </div>
+        <p class="status-line" id="signup-status"></p>
+      </form>
+
+      <form class="form-grid" id="signin-form" hidden style="margin-top:0">
+        <label class="field">Email
+          <input type="email" name="email" required autocomplete="email" placeholder="Josh.hailemelekot@gmail.com" />
+        </label>
+        <label class="field">Password
+          <input type="password" name="password" required autocomplete="current-password" placeholder="Your password" />
+        </label>
+        <div class="btn-row">
+          <button class="btn" type="submit" style="width:100%">Sign in</button>
+        </div>
+        <p class="status-line" id="signin-status"></p>
+      </form>
+    </section>
+
+    <section class="card-block" style="grid-column:1/-1;max-width:520px;margin:0 auto;width:100%">
+      <h2 style="margin:0;font-size:20px;letter-spacing:-0.02em;font-family:var(--display)">Weekly dispatch</h2>
+      <p class="page__lead" style="margin-top:6px">Orion notes, feature drops, and what’s shipping into beta.</p>
+      <form class="form-grid" id="newsletter-form" style="margin-top:16px">
+        <label class="field">Email
+          <input type="email" name="email" required autocomplete="email" placeholder="Josh.hailemelekot@gmail.com" />
+        </label>
+        <div class="btn-row">
+          <button class="btn" type="submit">Subscribe</button>
+        </div>
+        <p class="status-line" id="newsletter-status"></p>
+      </form>
+    </section>
+  </div>
+
+  <footer class="page-foot page-foot--wide">
+    <span>© <span data-year>2026</span> StoneForge Trading</span>
+    <a href="forum.html">Visit the forum →</a>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=6"></script>
+  <script src="cloud.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — StoneForge</title>
+  <meta name="description" content="Product notes on Orion, custody, and the StoneForge waitlist." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght;500;600;700&family=Outfit:wght;500;600;700&family=IBM+Plex+Mono:wght;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="shell">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="index.html">
+        <img class="topbar__logo" src="assets/stoneforge-logo.png" alt="stoneforge." />
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+                    <li><a href="spot.html">Your Spot</a></li>
+          <li><a href="forum.html">Forum</a></li>
+          <li><a href="blog.html" aria-current="page">Blog</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page page--wide fade-up">
+    <header class="page-hero">
+      <p class="mono page__kicker">Journal</p>
+      <h1 class="page__title">Notes from the trail.</h1>
+      <p class="page__lead">Longer writing on Orion, custody, and how the waitlist works — one idea per piece.</p>
+    </header>
+
+    <div class="blog-list blog-list--rich">
+      <a class="blog-card" href="blog-orion.html">
+        <div class="blog-card__meta">
+          <span class="blog-card__tag">Product</span>
+          <span class="blog-card__date">Oct 12, 2026 · 4 min</span>
+        </div>
+        <h2 class="blog-card__title">Orion explains itself</h2>
+        <p class="blog-card__excerpt">Why every setup comes with a reasoning line — and why a screenshot of AI is never enough.</p>
+      </a>
+
+      <a class="blog-card" href="blog-custody.html">
+        <div class="blog-card__meta">
+          <span class="blog-card__tag">Trust</span>
+          <span class="blog-card__date">Oct 5, 2026 · 5 min</span>
+        </div>
+        <h2 class="blog-card__title">Your broker holds the money</h2>
+        <p class="blog-card__excerpt">Trade-only keys, withdrawals blocked at the source, paper by default. The receipts behind the promise.</p>
+      </a>
+
+      <a class="blog-card" href="blog-batches.html">
+        <div class="blog-card__meta">
+          <span class="blog-card__tag">Waitlist</span>
+          <span class="blog-card__date">Sep 28, 2026 · 3 min</span>
+        </div>
+        <h2 class="blog-card__title">Invites go out in batches</h2>
+        <p class="blog-card__excerpt">How the list moves, why we show your spot, and what a referral actually does.</p>
+      </a>
+    </div>
+  </main>
+
+  <footer class="page-foot page-foot--wide">
+    <span>© <span data-year>2026</span> StoneForge Trading</span>
+    <a href="index.html">Join the waitlist →</a>
+  </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=6"></script>
+  <script src="cloud.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
