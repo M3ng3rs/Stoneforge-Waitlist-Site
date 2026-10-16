@@ -5,8 +5,8 @@ window.SF_CONFIG = {
 
   GAS_WEBHOOK_URL: "https://script.google.com/macros/s/AKfycbwQKBO10B4spSjlZ4wYSbxwmIVgDiuH75TrXr7GjuBnh8RObfwm3METpeGKqHbygg-Z/exec",
 
-  // Legacy local admin (only used if Supabase cloud is off).
+  // Founder admin. Replies from this login show as highlighted StoneForge admin posts.
   // Leave the password blank in git — set it only on your machine.
-  ADMIN_EMAIL: "admin@stoneforge.com",
+  ADMIN_EMAIL: "founder@stoneforge.app",
   ADMIN_PASSWORD: ""
 };

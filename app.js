@@ -532,8 +532,19 @@
   async function completeAccount(email, password, name, statusEl) {
     name = String(name || "").trim() || randomAlias();
     if (useCloud()) {
-      await Cloud.signUp(email, password, name);
-      await Cloud.signIn(email, password);
+      var created = await Cloud.signUp(email, password, name);
+      if (!created.session) {
+        try {
+          await Cloud.signIn(email, password);
+        } catch (err) {
+          var msg = (err && err.message) || "";
+          if (/confirm/i.test(msg)) {
+            if (statusEl) statusEl.textContent = "Check your inbox and tap Confirm email. Then sign in on Your Spot.";
+            return;
+          }
+          throw err;
+        }
+      }
       await bootCloud();
       if (statusEl) statusEl.textContent = "Login ready. You’re signed in.";
       return;
@@ -1018,7 +1029,12 @@
     refreshSessionUI();
     if (forumAdminBanner) forumAdminBanner.hidden = !isAdmin();
     if (typeof window.__sfRefreshAdmin === "function") window.__sfRefreshAdmin();
-    await reloadPosts();
+    try {
+      await reloadPosts();
+    } catch (err) {
+      var postStatus = document.getElementById("post-status");
+      if (postStatus) postStatus.textContent = err.message || "Couldn’t load the forum.";
+    }
   }
 
   // Seed local posts if needed

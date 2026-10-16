@@ -50,12 +50,44 @@
     return res.data.session || null;
   }
 
+  function raise(error) {
+    if (!error) return;
+    var msg = error.message || "Request failed";
+    if (error.code === "42501" || /permission denied for table/i.test(msg)) {
+      throw new Error("Your account is saved. Forum access still needs a one-time grant in Supabase.");
+    }
+    if (/email not confirmed/i.test(msg)) {
+      throw new Error("Check your inbox and tap Confirm email. Then sign in.");
+    }
+    var wrapped = new Error(msg);
+    wrapped.code = error.code;
+    throw wrapped;
+  }
+
   async function getProfile() {
     var sb = db();
     var session = await getSession();
     if (!sb || !session) return null;
     var res = await sb.from("profiles").select("*").eq("id", session.user.id).maybeSingle();
+    if (res.error) return null;
     return res.data || null;
+  }
+
+  async function ensureProfile() {
+    var existing = await getProfile();
+    if (existing) return existing;
+    var sb = db();
+    var session = await getSession();
+    if (!sb || !session) throw new Error("Sign in required");
+    var meta = session.user.user_metadata || {};
+    var name = meta.name || String(session.user.email || "member").split("@")[0];
+    var res = await sb.from("profiles").insert({
+      id: session.user.id,
+      email: session.user.email,
+      name: name
+    }).select("*").single();
+    if (res.error && res.error.code !== "23505") raise(res.error);
+    return (await getProfile()) || res.data;
   }
 
   function isFounderEmail(email) {
@@ -116,7 +148,7 @@
   async function signIn(email, password) {
     var sb = db();
     var res = await sb.auth.signInWithPassword({ email: email, password: password });
-    if (res.error) throw res.error;
+    if (res.error) raise(res.error);
     return res.data;
   }
 
@@ -171,7 +203,7 @@
   async function fetchPosts() {
     var sb = db();
     var postsRes = await sb.from("posts").select("*").order("created_at", { ascending: false });
-    if (postsRes.error) throw postsRes.error;
+    if (postsRes.error) raise(postsRes.error);
     var posts = postsRes.data || [];
     if (!posts.length) return [];
 
@@ -200,7 +232,7 @@
     var sb = db();
     var session = await getSession();
     if (!session) throw new Error("Sign in required");
-    var profile = await getProfile();
+    var profile = await ensureProfile();
     var row = {
       author_id: session.user.id,
       author_name: (profile && profile.name) || session.user.email.split("@")[0],
@@ -209,7 +241,7 @@
       body: body
     };
     var res = await sb.from("posts").insert(row).select("*").single();
-    if (res.error) throw res.error;
+    if (res.error) raise(res.error);
 
     await notifyForum({
       type: type,
@@ -230,7 +262,7 @@
     var existing = await sb.from("post_votes").select("*").eq("post_id", postId).eq("user_id", session.user.id).maybeSingle();
     if (existing.data && existing.data.value === value) {
       var del = await sb.from("post_votes").delete().eq("post_id", postId).eq("user_id", session.user.id);
-      if (del.error) throw del.error;
+      if (del.error) raise(del.error);
       return;
     }
     var upsert = await sb.from("post_votes").upsert({
@@ -238,7 +270,7 @@
       user_id: session.user.id,
       value: value
     });
-    if (upsert.error) throw upsert.error;
+    if (upsert.error) raise(upsert.error);
   }
 
   async function adminReply(postId, body) {
@@ -254,7 +286,7 @@
       body: body,
       is_admin: true
     }).select("*").single();
-    if (res.error) throw res.error;
+    if (res.error) raise(res.error);
 
     await notifyForum({
       type: "admin-reply",
