@@ -57,5 +57,31 @@ create policy "Auth insert votes" on post_votes for insert with check (auth.uid(
 create policy "Auth update votes" on post_votes for update using (auth.uid() = user_id);
 create policy "Auth delete votes" on post_votes for delete using (auth.uid() = user_id);
 
--- After you create your admin Auth user in Supabase, run (change email):
--- update profiles set is_admin = true where email = 'admin@stoneforge.com';
+-- Founder admin (create the Auth user first, or sign in once on the site)
+update profiles set is_admin = true where lower(email) = 'founder@stoneforge.app';
+
+-- Members can create their own profile if the signup trigger didn't
+drop policy if exists "Users insert own profile" on profiles;
+create policy "Users insert own profile" on profiles for insert with check (auth.uid() = id);
+
+-- Only the founder email can hold is_admin. Everyone else keeps the old flag.
+create or replace function public.lock_admin_flag()
+returns trigger
+language plpgsql
+as $$
+begin
+  if lower(coalesce(new.email, '')) = 'founder@stoneforge.app' then
+    new.is_admin := true;
+  elsif tg_op = 'UPDATE' then
+    new.is_admin := old.is_admin;
+  else
+    new.is_admin := false;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_lock_admin on profiles;
+create trigger profiles_lock_admin
+  before insert or update on profiles
+  for each row execute procedure public.lock_admin_flag();

@@ -91,6 +91,13 @@
     write(STORAGE.users, users);
   }
 
+  var ALIAS_ADJ = ["Arctic", "Amber", "Bold", "Bright", "Calm", "Copper", "Crimson", "Dusky", "Ember", "Golden", "Hidden", "Iron", "Jade", "Keen", "Lunar", "Misty", "Noble", "Quiet", "Rapid", "Silver", "Solar", "Swift", "Wild", "Young"];
+  var ALIAS_ANIMALS = ["Fox", "Otter", "Hawk", "Wolf", "Bear", "Lynx", "Heron", "Puma", "Owl", "Elk", "Raven", "Seal", "Stag", "Wren", "Hare", "Finch"];
+
+  function randomAlias() {
+    return ALIAS_ADJ[Math.floor(Math.random() * ALIAS_ADJ.length)] + " " + ALIAS_ANIMALS[Math.floor(Math.random() * ALIAS_ANIMALS.length)];
+  }
+
   function hash(str) {
     var h = 0;
     for (var i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
@@ -101,8 +108,14 @@
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  function isFounderSession() {
+    var email = cloudSession && cloudSession.user && cloudSession.user.email;
+    if (Cloud && Cloud.isFounderEmail) return Cloud.isFounderEmail(email);
+    return String(email || "").toLowerCase() === String(CONFIG.ADMIN_EMAIL || "").toLowerCase();
+  }
+
   function isAdmin() {
-    if (useCloud()) return !!(cloudProfile && cloudProfile.is_admin);
+    if (useCloud()) return !!((cloudProfile && cloudProfile.is_admin) || isFounderSession());
     return !!getAdminSession();
   }
 
@@ -148,7 +161,7 @@
     var status = document.getElementById("claim-status");
     if (posEl) posEl.textContent = String(position);
     if (emailEl) emailEl.value = email;
-    if (nameEl && !nameEl.value) nameEl.value = String(email).split("@")[0] || "";
+    if (nameEl && !nameEl.value) nameEl.value = randomAlias();
     if (refEl) refEl.value = referralUrl(code);
     if (status) status.textContent = "";
     try {
@@ -227,12 +240,17 @@
     video.loop = true;
     video.autoplay = true;
     video.playsInline = true;
+    function markPlaying() {
+      if (video.paused) return;
+      video.classList.add("is-ready");
+      if (video.parentElement) video.parentElement.classList.add("is-playing");
+    }
     function tryPlay() {
       var p = video.play();
-      if (p && p.then) p.then(function () { video.classList.add("is-ready"); }).catch(function () {});
+      if (p && p.then) p.then(markPlaying).catch(function () {});
     }
     tryPlay();
-    video.addEventListener("playing", function () { video.classList.add("is-ready"); });
+    video.addEventListener("playing", markPlaying);
   })();
 
   (function () {
@@ -334,6 +352,7 @@
     var num = document.getElementById("position-num");
     var ref = document.getElementById("position-referral");
     var composeAvatar = document.querySelector(".compose .avatar");
+    var nameCard = document.getElementById("name-card");
 
     function setSignedIn(name, positionText, referral) {
       if (bar) bar.classList.add("is-visible");
@@ -343,6 +362,8 @@
       if (num) num.textContent = positionText;
       if (ref && referral) ref.value = referral;
       if (composeAvatar) composeAvatar.textContent = initials(name);
+      if (nameCard) nameCard.hidden = false;
+      syncNameEditor(name);
     }
 
     function setSignedOut() {
@@ -350,6 +371,7 @@
       if (card) card.classList.remove("is-visible");
       if (empty) empty.style.display = "block";
       if (composeAvatar) composeAvatar.textContent = "+";
+      if (nameCard) nameCard.hidden = true;
     }
 
     if (useCloud()) {
@@ -388,6 +410,103 @@
     });
   }
 
+  var nameMode = "anon";
+
+  function currentIdentity() {
+    var meta = (cloudSession && cloudSession.user && cloudSession.user.user_metadata) || {};
+    var local = getSessionLocal() ? findUser(getSessionLocal().email) : null;
+    var alias = meta.alias || (local && local.alias) || "";
+    var publicName = meta.public_name || (local && local.publicName) || "";
+    var anonymous = meta.anonymous !== false && !(local && local.anonymous === false);
+    if (useCloud() && cloudProfile && meta.anonymous === undefined && !local) {
+      alias = alias || cloudProfile.name || randomAlias();
+    }
+    if (!alias) alias = (local && local.name) || (cloudProfile && cloudProfile.name) || randomAlias();
+    var shown = anonymous ? alias : (publicName || alias);
+    return { alias: alias, publicName: publicName, anonymous: anonymous, shown: shown };
+  }
+
+  function syncNameEditor(shownName) {
+    var input = document.getElementById("public-name");
+    var shuffle = document.getElementById("shuffle-name");
+    var id = currentIdentity();
+    nameMode = id.anonymous ? "anon" : "public";
+    document.querySelectorAll("[data-name-mode]").forEach(function (btn) {
+      btn.classList.toggle("is-active", btn.getAttribute("data-name-mode") === nameMode);
+    });
+    if (shuffle) shuffle.hidden = nameMode !== "anon";
+    if (input && document.activeElement !== input) {
+      input.value = nameMode === "anon" ? id.alias : (id.publicName || shownName || "");
+    }
+  }
+
+  document.querySelectorAll("[data-name-mode]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      nameMode = btn.getAttribute("data-name-mode");
+      document.querySelectorAll("[data-name-mode]").forEach(function (b) {
+        b.classList.toggle("is-active", b === btn);
+      });
+      var input = document.getElementById("public-name");
+      var shuffle = document.getElementById("shuffle-name");
+      var id = currentIdentity();
+      if (shuffle) shuffle.hidden = nameMode !== "anon";
+      if (!input) return;
+      if (nameMode === "anon") input.value = id.alias || randomAlias();
+      else input.value = id.publicName || "";
+    });
+  });
+
+  var shuffleBtn = document.getElementById("shuffle-name");
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener("click", function () {
+      var input = document.getElementById("public-name");
+      if (input) input.value = randomAlias();
+    });
+  }
+
+  var nameForm = document.getElementById("name-form");
+  if (nameForm) {
+    nameForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var input = document.getElementById("public-name");
+      var status = document.getElementById("name-status");
+      var value = String((input && input.value) || "").trim();
+      if (!value) {
+        if (status) status.textContent = "Pick a name first.";
+        return;
+      }
+      var id = currentIdentity();
+      var anonymous = nameMode !== "public";
+      var alias = anonymous ? value : id.alias;
+      var publicName = anonymous ? id.publicName : value;
+      var shown = anonymous ? alias : publicName;
+      try {
+        if (useCloud()) {
+          if (!Cloud.setPublicIdentity) throw new Error("Can’t save the name right now.");
+          cloudProfile = await Cloud.setPublicIdentity(shown, {
+            anonymous: anonymous,
+            alias: alias,
+            public_name: publicName
+          });
+          cloudSession = await Cloud.getSession();
+        } else {
+          var session = getSessionLocal();
+          var user = session ? findUser(session.email) : null;
+          if (!user) throw new Error("Sign in first.");
+          user.name = shown;
+          user.alias = alias;
+          user.publicName = publicName;
+          user.anonymous = anonymous;
+          write(STORAGE.users, getUsers().map(function (u) { return u.email === user.email ? user : u; }));
+        }
+        if (status) status.textContent = anonymous ? "Anonymous name saved." : "Public name saved.";
+        refreshSessionUI();
+      } catch (err) {
+        if (status) status.textContent = err.message || "Couldn’t save name";
+      }
+    });
+  }
+
   var positionCopy = document.getElementById("position-copy");
   if (positionCopy) {
     positionCopy.addEventListener("click", function () {
@@ -411,6 +530,7 @@
   });
 
   async function completeAccount(email, password, name, statusEl) {
+    name = String(name || "").trim() || randomAlias();
     if (useCloud()) {
       await Cloud.signUp(email, password, name);
       await Cloud.signIn(email, password);
@@ -424,7 +544,9 @@
       throw new Error("An account with that email already exists. Sign in on Your Spot.");
     }
     if (existing && !existing.passwordHash) {
-      existing.name = name || existing.name;
+      existing.name = name || existing.name || randomAlias();
+      existing.alias = existing.alias || existing.name;
+      existing.anonymous = existing.anonymous !== false;
       existing.passwordHash = hash(password);
       write(STORAGE.users, users.map(function (u) { return u.email === email ? existing : u; }));
       setSessionLocal(email);
@@ -433,7 +555,8 @@
       return;
     }
     var user = {
-      email: email, name: name, passwordHash: hash(password),
+      email: email, name: name, alias: name, anonymous: true, publicName: "",
+      passwordHash: hash(password),
       position: nextPosition(), code: makeCode(), referrals: 0, createdAt: Date.now()
     };
     users.push(user);
@@ -488,6 +611,17 @@
       closeClaimSheet();
     });
   }
+
+  var claimShuffle = document.getElementById("claim-shuffle");
+  if (claimShuffle) {
+    claimShuffle.addEventListener("click", function () {
+      var nameEl = document.getElementById("claim-name");
+      if (nameEl) nameEl.value = randomAlias();
+    });
+  }
+
+  var signupName = document.getElementById("signup-name");
+  if (signupName && !signupName.value) signupName.value = randomAlias();
 
   var claimCopy = document.getElementById("claim-copy");
   if (claimCopy) {
@@ -814,15 +948,24 @@
       var password = String(fd.get("password") || "");
       try {
         if (useCloud()) {
-          await Cloud.signIn(email, password);
+          var founder = String(email).toLowerCase() === String(CONFIG.ADMIN_EMAIL || "").toLowerCase();
+          var passOk = password === (CONFIG.ADMIN_PASSWORD || "");
+          try {
+            await Cloud.signIn(email, password);
+          } catch (signInErr) {
+            if (!(founder && passOk)) throw signInErr;
+            await Cloud.signUp(email, password, "StoneForge");
+            await Cloud.signIn(email, password);
+          }
           await bootCloud();
-          if (!cloudProfile || !cloudProfile.is_admin) {
+          if (Cloud.ensureFounderAdmin) cloudProfile = await Cloud.ensureFounderAdmin() || cloudProfile;
+          if (!isAdmin()) {
             await Cloud.signOut();
             cloudSession = null;
             cloudProfile = null;
-            throw new Error("This account is not marked is_admin in Supabase yet.");
+            throw new Error("This account cannot reply as admin.");
           }
-          adminStatus.textContent = "Signed in as admin.";
+          adminStatus.textContent = "Signed in. Your replies will be highlighted.";
           refreshAdminUI();
           return;
         }
@@ -834,7 +977,11 @@
           adminStatus.textContent = "Wrong admin email or password.";
         }
       } catch (err) {
-        adminStatus.textContent = err.message || "Admin login failed";
+        var msg = err.message || "Admin login failed";
+        if (/not confirmed/i.test(msg)) {
+          msg = "Confirm founder@stoneforge.app from the Supabase email, then sign in again.";
+        }
+        adminStatus.textContent = msg;
       }
     });
 
@@ -865,6 +1012,9 @@
     if (!useCloud()) return;
     cloudSession = await Cloud.getSession();
     cloudProfile = cloudSession ? await Cloud.getProfile() : null;
+    if (cloudProfile && Cloud.ensureFounderAdmin && isFounderSession()) {
+      cloudProfile = await Cloud.ensureFounderAdmin() || cloudProfile;
+    }
     refreshSessionUI();
     if (forumAdminBanner) forumAdminBanner.hidden = !isAdmin();
     if (typeof window.__sfRefreshAdmin === "function") window.__sfRefreshAdmin();

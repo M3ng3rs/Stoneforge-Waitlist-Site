@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Admin — StoneForge</title>
-  <meta name="robots" content="noindex" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#efe0d2" />
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -37,10 +41,10 @@
     <section id="admin-gate" class="auth-card" style="margin:0 auto 20px">
       <img class="auth-card__mark" src="assets/stoneforge-logo.png" alt="" />
       <h1>Staff login</h1>
-      <p class="auth-card__lead">Credentials live in <code style="font-family:var(--mono);font-size:12px">config.js</code>.</p>
+      <p class="auth-card__lead">Sign in as the founder. Replies post with the highlighted Admin badge.</p>
       <form class="form-grid" id="admin-login-form" style="margin-top:22px">
         <label class="field">Email
-          <input type="email" name="email" required autocomplete="username" placeholder="admin@stoneforge.com" />
+          <input type="email" name="email" required autocomplete="username" placeholder="founder@stoneforge.app" value="founder@stoneforge.app" />
         </label>
         <label class="field">Password
           <input type="password" name="password" required autocomplete="current-password" />
@@ -72,8 +76,8 @@
     <span class="mono" style="text-transform:none;letter-spacing:0">Not linked in public nav — bookmark this URL.</span>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=6"></script>
-  <script src="cloud.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="config.js?v=9"></script>
+  <script src="cloud.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

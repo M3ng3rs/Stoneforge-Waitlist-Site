@@ -3,12 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>StoneForge — Join the Waitlist</title>
-  <meta name="description" content="A hedge fund that lives in your pocket. Join the StoneForge private beta waitlist." />
+  <title>StoneForge — A hedge fund that lives in your pocket</title>
+  <meta name="description" content="Join the StoneForge private beta. Orion finds the setup and shows its reasoning. Your broker holds the money." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://stoneforge.app/" />
+  <meta name="theme-color" content="#efe0d2" />
+  <meta name="application-name" content="StoneForge" />
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" href="assets/favicon-light.png" media="(prefers-color-scheme: light)" />
+  <link rel="icon" type="image/png" href="assets/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="StoneForge" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="StoneForge — A hedge fund that lives in your pocket" />
+  <meta property="og:description" content="Join the StoneForge private beta. Orion finds the setup and shows its reasoning. Your broker holds the money." />
+  <meta property="og:url" content="https://stoneforge.app/" />
+  <meta property="og:image" content="https://stoneforge.app/assets/og-banner.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="StoneForge — a hedge fund that lives in your pocket" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="StoneForge — A hedge fund that lives in your pocket" />
+  <meta name="twitter:description" content="Join the StoneForge private beta. Orion finds the setup and shows its reasoning. Your broker holds the money." />
+  <meta name="twitter:image" content="https://stoneforge.app/assets/og-banner.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "StoneForge",
+        "url": "https://stoneforge.app/",
+        "logo": "https://stoneforge.app/assets/stoneforge-logo.png",
+        "email": "founder@stoneforge.app"
+      },
+      {
+        "@type": "WebSite",
+        "name": "StoneForge",
+        "url": "https://stoneforge.app/",
+        "description": "A hedge fund that lives in your pocket. Join the private beta waitlist."
+      }
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=11" />
   <link rel="stylesheet" href="premium.css?v=7" />
   <script>
     if (matchMedia("(pointer: coarse)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -19,9 +63,11 @@
 <body class="is-locked">
   <main class="site">
     <div class="site__stage" aria-hidden="true">
+    <canvas class="site__canvas" aria-hidden="true"></canvas>
     <video
       id="bg-video"
       class="site__video"
+      style="position:fixed;width:1px;height:1px;left:0;bottom:0;opacity:0;pointer-events:none"
       muted
       autoplay
       loop
@@ -102,9 +148,10 @@
         <label class="field">Email
           <input type="email" name="email" id="claim-email" required readonly autocomplete="email" />
         </label>
-        <label class="field">Display name
-          <input type="text" name="name" id="claim-name" required maxlength="40" autocomplete="nickname" placeholder="JoshTheBoss" />
+        <label class="field">Public name
+          <input type="text" name="name" id="claim-name" required maxlength="40" autocomplete="nickname" placeholder="Arctic Fox" />
         </label>
+        <button class="btn btn--ghost" type="button" id="claim-shuffle" style="justify-self:start">Shuffle name</button>
         <label class="field">Password
           <input type="password" name="password" id="claim-password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters" />
         </label>
@@ -150,7 +197,9 @@
       }
 
       function ready() {
+        if (v.paused && !v.ended) return;
         v.classList.add("is-ready");
+        if (v.parentElement) v.parentElement.classList.add("is-playing");
       }
 
       function forcePlay() {
@@ -188,6 +237,30 @@
             forcePlay();
           });
       }
+
+      var canvas = document.querySelector(".site__canvas");
+      var ctx = canvas && canvas.getContext("2d", { alpha: true });
+      function paint() {
+        if (canvas && ctx && v.readyState >= 2) {
+          var stage = canvas.parentElement;
+          var w = stage ? stage.clientWidth : 0;
+          var h = stage ? stage.clientHeight : 0;
+          if (w && h) {
+            if (canvas.width !== w) canvas.width = w;
+            if (canvas.height !== h) canvas.height = h;
+            try {
+              var vw = v.videoWidth || w;
+              var vh = v.videoHeight || h;
+              var scale = Math.max(w / vw, h / vh);
+              var dw = vw * scale;
+              var dh = vh * scale;
+              ctx.drawImage(v, (w - dw) / 2, (h - dh) / 2, dw, dh);
+            } catch (err) {}
+          }
+        }
+        requestAnimationFrame(paint);
+      }
+      paint();
 
       arm();
       // iOS is more reliable with a plain file URL than a blob.
@@ -232,8 +305,8 @@
     })();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=6"></script>
-  <script src="cloud.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="config.js?v=9"></script>
+  <script src="cloud.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

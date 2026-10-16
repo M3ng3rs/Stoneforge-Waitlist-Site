@@ -58,12 +58,56 @@
     return res.data || null;
   }
 
+  function isFounderEmail(email) {
+    return String(email || "").trim().toLowerCase() === String(CONFIG.ADMIN_EMAIL || "").trim().toLowerCase();
+  }
+
+  async function updateProfile(patch) {
+    var sb = db();
+    var session = await getSession();
+    if (!sb || !session) throw new Error("Sign in required");
+    var res = await sb.from("profiles").update(patch).eq("id", session.user.id).select("*").single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  async function setPublicIdentity(displayName, meta) {
+    var sb = db();
+    var session = await getSession();
+    if (!sb || !session) throw new Error("Sign in required");
+    var authRes = await sb.auth.updateUser({ data: meta || {} });
+    if (authRes.error) throw authRes.error;
+    return updateProfile({ name: displayName });
+  }
+
+  async function ensureFounderAdmin() {
+    var sb = db();
+    var session = await getSession();
+    var profile = await getProfile();
+    if (!sb || !session) return profile;
+    if (!profile && isFounderEmail(session.user.email)) {
+      var created = await sb.from("profiles").insert({
+        id: session.user.id,
+        email: session.user.email,
+        name: "StoneForge",
+        is_admin: true
+      }).select("*").single();
+      if (!created.error) return created.data;
+      return profile;
+    }
+    if (!profile) return profile;
+    if (!isFounderEmail(session.user.email) || profile.is_admin) return profile;
+    var res = await sb.from("profiles").update({ is_admin: true }).eq("id", session.user.id).select("*").single();
+    if (res.error) return profile;
+    return res.data;
+  }
+
   async function signUp(email, password, name) {
     var sb = db();
     var res = await sb.auth.signUp({
       email: email,
       password: password,
-      options: { data: { name: name || email.split("@")[0] } }
+      options: { data: { name: name || email.split("@")[0], alias: name || email.split("@")[0], anonymous: true, public_name: "" } }
     });
     if (res.error) throw res.error;
     return res.data;
@@ -201,7 +245,8 @@
     var sb = db();
     var session = await getSession();
     var profile = await getProfile();
-    if (!session || !profile || !profile.is_admin) throw new Error("Admin only");
+    var founder = isFounderEmail(session && session.user && session.user.email);
+    if (!session || !profile || (!profile.is_admin && !founder)) throw new Error("Admin only");
     var res = await sb.from("replies").insert({
       post_id: postId,
       author_id: session.user.id,
@@ -230,6 +275,10 @@
     notifyWaitlist: notifyWaitlist,
     getSession: getSession,
     getProfile: getProfile,
+    updateProfile: updateProfile,
+    setPublicIdentity: setPublicIdentity,
+    ensureFounderAdmin: ensureFounderAdmin,
+    isFounderEmail: isFounderEmail,
     signUp: signUp,
     signIn: signIn,
     signOut: signOut,

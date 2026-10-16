@@ -4,7 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Your Spot — StoneForge</title>
-  <meta name="description" content="Check your StoneForge waitlist position and manage your account." />
+  <meta name="description" content="Check your StoneForge waitlist position, edit your public name, and sign in." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://stoneforge.app/spot.html" />
+  <meta name="theme-color" content="#efe0d2" />
+  <meta name="application-name" content="StoneForge" />
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" href="assets/favicon-light.png" media="(prefers-color-scheme: light)" />
+  <link rel="icon" type="image/png" href="assets/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="StoneForge" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Your Spot — StoneForge" />
+  <meta property="og:description" content="Check your StoneForge waitlist position, edit your public name, and sign in." />
+  <meta property="og:url" content="https://stoneforge.app/spot.html" />
+  <meta property="og:image" content="https://stoneforge.app/assets/og-banner.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="StoneForge — a hedge fund that lives in your pocket" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Your Spot — StoneForge" />
+  <meta name="twitter:description" content="Check your StoneForge waitlist position, edit your public name, and sign in." />
+  <meta name="twitter:image" content="https://stoneforge.app/assets/og-banner.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -58,9 +82,10 @@
       </div>
 
       <form class="form-grid" id="signup-form" style="margin-top:0">
-        <label class="field">Display name
-          <input type="text" name="name" required maxlength="40" autocomplete="nickname" placeholder="JoshTheBoss" />
+        <label class="field">Public name
+          <input type="text" name="name" id="signup-name" required maxlength="40" autocomplete="nickname" placeholder="Arctic Fox" />
         </label>
+        <p class="waitlist__hint">This is the name on the forum. We start you anonymous — shuffle or type your own.</p>
         <label class="field">Email
           <input type="email" name="email" required autocomplete="email" placeholder="Josh.hailemelekot@gmail.com" />
         </label>
@@ -87,6 +112,25 @@
       </form>
     </section>
 
+    <section class="card-block" id="name-card" hidden style="grid-column:1/-1;max-width:520px;margin:0 auto;width:100%">
+      <h2 style="margin:0;font-size:20px;letter-spacing:-0.02em;font-family:var(--display)">Public name</h2>
+      <p class="page__lead" style="margin-top:6px">The forum shows this name, never your email. Stay anonymous, or switch it public.</p>
+      <div class="auth-toggle" role="tablist" aria-label="Anonymous or public" style="margin-top:16px">
+        <button type="button" class="is-active" data-name-mode="anon">Anonymous</button>
+        <button type="button" data-name-mode="public">Public</button>
+      </div>
+      <form class="form-grid" id="name-form" style="margin-top:0">
+        <label class="field">Username
+          <input type="text" name="name" id="public-name" required maxlength="40" autocomplete="nickname" placeholder="Arctic Fox" />
+        </label>
+        <div class="btn-row">
+          <button class="btn btn--ghost" type="button" id="shuffle-name">Shuffle</button>
+          <button class="btn" type="submit">Save name</button>
+        </div>
+        <p class="status-line" id="name-status"></p>
+      </form>
+    </section>
+
     <section class="card-block" style="grid-column:1/-1;max-width:520px;margin:0 auto;width:100%">
       <h2 style="margin:0;font-size:20px;letter-spacing:-0.02em;font-family:var(--display)">Weekly dispatch</h2>
       <p class="page__lead" style="margin-top:6px">Orion notes, feature drops, and what’s shipping into beta.</p>
@@ -107,8 +151,8 @@
     <a href="forum.html">Visit the forum →</a>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=6"></script>
-  <script src="cloud.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="config.js?v=9"></script>
+  <script src="cloud.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
