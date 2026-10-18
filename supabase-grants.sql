@@ -113,3 +113,44 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 update public.profiles set is_admin = true where lower(email) = 'founder@stoneforge.app';
+
+-- Referrals: the new member can't update someone else's row under RLS.
+create or replace function public.bump_referral(code text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if code is null or length(trim(code)) = 0 then
+    return;
+  end if;
+  update public.waitlist
+  set position = greatest(1, position - 1)
+  where referral_code = trim(code);
+end;
+$$;
+
+grant execute on function public.bump_referral(text) to anon, authenticated;
+
+-- Only the founder email can hold is_admin.
+create or replace function public.lock_admin_flag()
+returns trigger
+language plpgsql
+as $$
+begin
+  if lower(coalesce(new.email, '')) = 'founder@stoneforge.app' then
+    new.is_admin := true;
+  elsif tg_op = 'UPDATE' then
+    new.is_admin := old.is_admin;
+  else
+    new.is_admin := false;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_lock_admin on public.profiles;
+create trigger profiles_lock_admin
+  before insert or update on public.profiles
+  for each row execute procedure public.lock_admin_flag();

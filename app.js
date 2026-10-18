@@ -24,6 +24,7 @@
 
   var cloudProfile = null;
   var cloudSession = null;
+  var cloudWaitlist = null;
   var cloudPosts = [];
 
   function read(key, fallback) {
@@ -375,12 +376,11 @@
     }
 
     if (useCloud()) {
-      if (cloudProfile) {
-        setSignedIn(
-          cloudProfile.name,
-          cloudProfile.waitlist_position ? ("#" + cloudProfile.waitlist_position) : "—",
-          cloudProfile.referral_code ? referralUrl(cloudProfile.referral_code) : ""
-        );
+      if (cloudProfile || cloudSession) {
+        var spotName = (cloudProfile && cloudProfile.name) || (cloudSession && cloudSession.user && cloudSession.user.email.split("@")[0]) || "Member";
+        var spotPos = (cloudWaitlist && cloudWaitlist.position) || (cloudProfile && cloudProfile.waitlist_position);
+        var spotCode = (cloudWaitlist && cloudWaitlist.referral_code) || (cloudProfile && cloudProfile.referral_code);
+        setSignedIn(spotName, spotPos ? ("#" + spotPos) : "—", spotCode ? referralUrl(spotCode) : "");
       } else {
         setSignedOut();
       }
@@ -404,6 +404,7 @@
       if (useCloud()) await Cloud.signOut();
       cloudSession = null;
       cloudProfile = null;
+      cloudWaitlist = null;
       setSessionLocal(null);
       refreshSessionUI();
       renderPosts();
@@ -534,20 +535,12 @@
     if (useCloud()) {
       var created = await Cloud.signUp(email, password, name);
       if (!created.session) {
-        try {
-          await Cloud.signIn(email, password);
-        } catch (err) {
-          var msg = (err && err.message) || "";
-          if (/confirm/i.test(msg)) {
-            if (statusEl) statusEl.textContent = "Check your inbox and tap Confirm email. Then sign in on Your Spot.";
-            return;
-          }
-          throw err;
-        }
+        if (statusEl) statusEl.textContent = "Check your inbox and tap Confirm email. Then sign in on Your Spot.";
+        return { needsConfirm: true };
       }
       await bootCloud();
       if (statusEl) statusEl.textContent = "Login ready. You’re signed in.";
-      return;
+      return { ok: true };
     }
     var existing = findUser(email);
     var users = getUsers();
@@ -587,8 +580,8 @@
       var password = String(fd.get("password") || "");
       var status = document.getElementById("signup-status");
       try {
-        await completeAccount(email, password, name, status);
-        signupForm.reset();
+        var createdAccount = await completeAccount(email, password, name, status);
+        if (!createdAccount || !createdAccount.needsConfirm) signupForm.reset();
       } catch (err) {
         status.textContent = err.message || "Signup failed";
       }
@@ -605,7 +598,8 @@
       var password = String(fd.get("password") || "");
       var status = document.getElementById("claim-status");
       try {
-        await completeAccount(email, password, name, status);
+        var claimed = await completeAccount(email, password, name, status);
+        if (claimed && claimed.needsConfirm) return;
         setTimeout(function () {
           closeClaimSheet();
           window.location.href = "spot.html";
@@ -1003,6 +997,7 @@
         setAdminSession(false);
         cloudSession = null;
         cloudProfile = null;
+        cloudWaitlist = null;
         refreshAdminUI();
       });
     }
@@ -1023,6 +1018,16 @@
     if (!useCloud()) return;
     cloudSession = await Cloud.getSession();
     cloudProfile = cloudSession ? await Cloud.getProfile() : null;
+    cloudWaitlist = null;
+    if (cloudSession && Cloud.ensureSpot) {
+      try {
+        var spot = await Cloud.ensureSpot();
+        if (spot) {
+          cloudProfile = spot.profile || cloudProfile;
+          cloudWaitlist = spot.waitlist || null;
+        }
+      } catch (e) {}
+    }
     if (cloudProfile && Cloud.ensureFounderAdmin && isFounderSession()) {
       cloudProfile = await Cloud.ensureFounderAdmin() || cloudProfile;
     }

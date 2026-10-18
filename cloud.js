@@ -59,6 +59,12 @@
     if (/email not confirmed/i.test(msg)) {
       throw new Error("Check your inbox and tap Confirm email. Then sign in.");
     }
+    if (/rate limit/i.test(msg)) {
+      throw new Error("Too many confirmation emails just went out. Wait a minute and try again.");
+    }
+    if (/already registered/i.test(msg)) {
+      throw new Error("That email already has an account. Sign in on Your Spot.");
+    }
     var wrapped = new Error(msg);
     wrapped.code = error.code;
     throw wrapped;
@@ -136,12 +142,31 @@
 
   async function signUp(email, password, name) {
     var sb = db();
+    var meta = {
+      name: name || email.split("@")[0],
+      alias: name || email.split("@")[0],
+      anonymous: true,
+      public_name: ""
+    };
+    var redirect = global.location && global.location.origin ? global.location.origin + "/spot.html" : undefined;
     var res = await sb.auth.signUp({
       email: email,
       password: password,
-      options: { data: { name: name || email.split("@")[0], alias: name || email.split("@")[0], anonymous: true, public_name: "" } }
+      options: { data: meta, emailRedirectTo: redirect }
     });
-    if (res.error) throw res.error;
+    if (res.error && redirect && /redirect/i.test(res.error.message || "")) {
+      res = await sb.auth.signUp({
+        email: email,
+        password: password,
+        options: { data: meta }
+      });
+    }
+    if (res.error) raise(res.error);
+    var user = res.data && res.data.user;
+    var identities = user && user.identities;
+    if (user && !res.data.session && Array.isArray(identities) && identities.length === 0) {
+      throw new Error("That email already has an account. Sign in on Your Spot.");
+    }
     return res.data;
   }
 
@@ -180,9 +205,12 @@
     if (ins.error) throw ins.error;
 
     if (referredBy) {
-      var ref = await sb.from("waitlist").select("*").eq("referral_code", referredBy).maybeSingle();
-      if (ref.data) {
-        await sb.from("waitlist").update({ position: Math.max(1, ref.data.position - 1) }).eq("id", ref.data.id);
+      var bump = await sb.rpc("bump_referral", { code: referredBy });
+      if (bump.error) {
+        var ref = await sb.from("waitlist").select("*").eq("referral_code", referredBy).maybeSingle();
+        if (ref.data) {
+          await sb.from("waitlist").update({ position: Math.max(1, ref.data.position - 1) }).eq("id", ref.data.id);
+        }
       }
     }
 
@@ -198,6 +226,33 @@
     });
 
     return ins.data;
+  }
+
+  async function ensureSpot() {
+    var sb = db();
+    var session = await getSession();
+    if (!sb || !session || !session.user || !session.user.email) return null;
+    var profile = await ensureProfile();
+    var email = String(session.user.email).trim().toLowerCase();
+    var existing = await sb.from("waitlist").select("*").eq("email", email).maybeSingle();
+    var row = existing.data;
+    if (!row) {
+      try {
+        row = await joinWaitlist(email, (profile && profile.name) || null, null);
+      } catch (e) {
+        row = null;
+      }
+    }
+    if (row && profile) {
+      var patch = { waitlist_position: row.position };
+      if (row.referral_code && profile.referral_code !== row.referral_code) patch.referral_code = row.referral_code;
+      var updated = await sb.from("profiles").update(patch).eq("id", session.user.id).select("*").single();
+      if (updated.error && patch.referral_code) {
+        updated = await sb.from("profiles").update({ waitlist_position: row.position }).eq("id", session.user.id).select("*").single();
+      }
+      if (updated.data) profile = updated.data;
+    }
+    return { profile: profile, waitlist: row };
   }
 
   async function fetchPosts() {
@@ -307,6 +362,7 @@
     notifyWaitlist: notifyWaitlist,
     getSession: getSession,
     getProfile: getProfile,
+    ensureSpot: ensureSpot,
     updateProfile: updateProfile,
     setPublicIdentity: setPublicIdentity,
     ensureFounderAdmin: ensureFounderAdmin,
